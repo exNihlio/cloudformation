@@ -33,15 +33,43 @@ Resources:
            FromPort: 0
            ToPort: 0
            CidrIp: "0.0.0.0/0"
-  # SampleInternetGateway:
-  #   Type: "AWS::EC2:InternetGateway"
-  # SampleSubnet:
-  #   Type: "AWS::EC2:Subnet"
-  # SampleRouteTable:
-  #   Type: "AWS::EC2::RouteTable"
-  # SampleRoute:
-  #   Type: "AWS::EC2::Route"
-  # SampleSubnetRouteTableAssoc:
-  #   Type: "AWS::EC2::SubnetRouteTableSAssociation"
+  SampleInternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags:
+        - Key: "Name"
+          Value: "sample-igw"
+  # Attach the Internet Gateway to our VPC
+  SampleVPCGatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      InternetGatewayId: !Ref "SampleInternetGateway"
+      VpcId: !Ref "SampleVPC"
+  SampleSubnet:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      CidrBlock: "10.1.1.0/24"
+      AvailabilityZone: "us-west-2a"
+      VpcId: !Ref "SampleVPC"
+      MapPublicIpOnLaunch: True
+      Tags:
+        - Key: "Name"
+          Value: "sub-pub-usw2a"
+  SampleRouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref "SampleVPC"
+  # Create a route that allows access to the access to the internet
+  SampleRoute:
+    Type: "AWS::EC2::Route"
+    Properties:
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref "SampleInternetGateway"
+      RouteTableId: !Ref "SampleRouteTable"
+  SampleSubnetRouteTableAssoc:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref "SampleRouteTable"
+      SubnetId: !Ref "SampleSubnet"
   # SampleEC2Instance:
   #   Type:
