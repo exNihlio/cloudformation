@@ -1,3 +1,7 @@
+Mappings:
+  Regions:
+    us-west-2:
+      AMI: "ami-0873b46c45c11058d"
 Resources:
   ## Create the VPC here
   SampleVPC:
@@ -71,5 +75,23 @@ Resources:
     Properties:
       RouteTableId: !Ref "SampleRouteTable"
       SubnetId: !Ref "SampleSubnet"
-  # SampleEC2Instance:
-  #   Type:
+  SampleEC2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      AvailabilityZone: "us-west-2a"
+      InstanceType: "t2.micro"
+      EbsOptimized: True
+      # The AMI to use
+      ImageId: 
+        Fn::FindInMap:
+          - Regions
+          - !Ref AWS::Region
+          - AMI
+      SecurityGroups: 
+        - !GetAtt [ "SampleSecurityGroup", "GroupId" ]
+      SubnetId: !Ref "SampleSubnet"
+      # Base64 encode the output of pulling the cloud-init-base
+      # parameter from SSM Parameter store. There is a limit of
+      # sixty (60) lookups in each stack
+      UserData: 
+        Fn::Base64: '{{resolve::ssm::cloud-init-base}}'
