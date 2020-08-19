@@ -1,0 +1,8 @@
+Resources:
+  # If a name is not specified, then 'S3Bucket' + a random string would become the
+  # the bucket name
+  S3Bucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      AccessControl: "Private"
+      BucketName: "gnipgnop170388263872636816826182"
