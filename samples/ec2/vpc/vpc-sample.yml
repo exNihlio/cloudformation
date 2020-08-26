@@ -1,7 +1,7 @@
 Mappings:
   Regions:
     us-west-2:
-      AMI: "ami-0873b46c45c11058d"
+      AMI: "ami-0a634ae95e11c6f91"
 Resources:
   ## Create the VPC here
   SampleVPC:
@@ -80,18 +80,27 @@ Resources:
     Properties:
       AvailabilityZone: "us-west-2a"
       InstanceType: "t2.micro"
-      EbsOptimized: True
+      #EbsOptimized: True
       # The AMI to use
       ImageId: 
         Fn::FindInMap:
           - Regions
           - !Ref AWS::Region
           - AMI
-      SecurityGroups: 
+      SecurityGroupIds: 
         - !GetAtt [ "SampleSecurityGroup", "GroupId" ]
       SubnetId: !Ref "SampleSubnet"
-      # Base64 encode the output of pulling the cloud-init-base
-      # parameter from SSM Parameter store. There is a limit of
-      # sixty (60) lookups in each stack
-      UserData: 
-        Fn::Base64: '{{resolve::ssm::cloud-init-base}}'
+      # Base64 encode the block, which is a cloud-init yaml
+        Fn::Base64: |
+          #cloud-config
+          users:
+            - name: sample-cf-user
+              sudo: ALL=(ALL) NOPASSWD:ALL
+              shell: /bin/bash
+              ssh_authorized_keys:
+                - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILkFZyn38amsLO4q8H6igxZJEX2i0xDXXpsagGNVv3b3 foobar@gnip.gnop.com
+          package_update: true
+          packages:
+            - vim
+            - git
+            - ansible
